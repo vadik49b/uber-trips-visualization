@@ -3,6 +3,7 @@ import mapboxgl from 'mapbox-gl'
 import './App.css'
 import 'mapbox-gl/dist/mapbox-gl.css'
 import car from './car.png'
+import io from 'socket.io-client'
 
 mapboxgl.accessToken = 'pk.eyJ1IjoidmFkaWs0OWIiLCJhIjoiTjFCRmNuNCJ9.KUJpmJuwHou0F_vaQcv20g'
 
@@ -14,22 +15,22 @@ class App extends Component {
       style: 'mapbox://styles/mapbox/streets-v9',
       zoom: 11
     })
-    this.simulateBackpressure()
+    this.socket = io('http://localhost:3001')
+    this.socket.on('pickup', pickup => {
+      this.addPickup(pickup)
+    })
   }
 
-  simulateBackpressure() {
-    setInterval(() => {
-      fetch('/api/ride').then(res => res.json()).then(ride => {
-        const lng = Number(ride.Lon)
-        const lat = Number(ride.Lat)
+  componentWillUnmount () {
+    this.socket.disconnect()
+  }
 
-        const div = document.createElement('div')
-        div.className = 'Car'
-        div.style.cssText = `background-image: url(${car})`
-        new mapboxgl.Marker(div, { offset: [-15, -15] })
-          .setLngLat([lng, lat]).addTo(this.map)
-      })
-    }, 500)
+  addPickup ([date, lat, lon]) {
+    const div = document.createElement('div')
+    div.className = 'Car'
+    div.style.cssText = `background-image: url(${car})`
+    new mapboxgl.Marker(div, { offset: [-15, -15] })
+      .setLngLat([Number(lon), Number(lat)]).addTo(this.map)
   }
 
   render () {

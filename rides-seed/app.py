@@ -1,5 +1,6 @@
 from csv import DictReader
 from flask import Flask
+from flask_socketio import SocketIO, emit
 from random import randint
 import json
 
@@ -11,6 +12,7 @@ with open('uber-data.csv') as csvfile:
         rides.append(ride)
 
 app = Flask(__name__)
+socketio = SocketIO(app)
 
 
 @app.route('/api/ride')
@@ -19,5 +21,10 @@ def get_ride():
     return json.dumps(random_ride)
 
 
+@socketio.on('connect')
+def test_connect():
+    emit('my response', {'data': 'Connected'})
+
+
 if __name__ == '__main__':
-    app.run()
+    socketio.run(app)
