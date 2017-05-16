@@ -11,10 +11,9 @@ const getRandomPickup = () => pickups[Math.floor(Math.random() * pickups.length)
 
 io.on('connection', client => {
   console.log(`Client connected: ${Date.now()}`)
-  let i = 0
   setInterval(() => {
     client.emit('pickup', getRandomPickup())
-  }, 1000)
+  }, 100)
 })
 
 io.listen(3001)

@@ -1,9 +1,10 @@
 import React, { Component } from 'react'
-import mapboxgl from 'mapbox-gl'
 import './App.css'
 import 'mapbox-gl/dist/mapbox-gl.css'
 import car from './car.png'
 import io from 'socket.io-client'
+import mapboxgl from 'mapbox-gl'
+import Rx from 'rx'
 
 mapboxgl.accessToken = 'pk.eyJ1IjoidmFkaWs0OWIiLCJhIjoiTjFCRmNuNCJ9.KUJpmJuwHou0F_vaQcv20g'
 
@@ -16,9 +17,13 @@ class App extends Component {
       zoom: 11
     })
     this.socket = io('http://localhost:3001')
-    this.socket.on('pickup', pickup => {
-      this.addPickup(pickup)
-    })
+    Rx.Observable.fromEvent(this.socket, 'pickup')
+      .bufferWithCount(20)
+      .subscribe(pickupsBuf => {
+        for (const p of pickupsBuf) {
+          this.addPickup(p)
+        }
+      })
   }
 
   componentWillUnmount () {
